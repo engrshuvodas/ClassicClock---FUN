@@ -1,5 +1,4 @@
 
-
   <h1>🎉 ClassicClock - The Coolest Clock You'll Ever Meet! ⏰</h1>
 
   <h2>⏳ What’s Time Without Some Fun?</h2>
@@ -16,7 +15,7 @@
 
   <h2>📸 ClassicClock In Action (Trust Us, It's Gorgeous)</h2>
   <p>Here's a sneak peek of the magic. 👇 Get ready to fall in love with time again.</p>
-  <img src="classicclock-preview.png" alt="ClassicClock Preview" width="100%">
+  <img src="classicclock ss.png" alt="ClassicClock Preview" width="100%">
 
   <h2>🌐 Live Demo – It's Like Watching Time Itself</h2>
   <p>👉 Check out the live demo of ClassicClock and get blown away by the clock of your dreams:</p>
