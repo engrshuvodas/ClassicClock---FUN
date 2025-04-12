@@ -56,21 +56,21 @@
     .hand.hour {
       width: 22%;
       height: 0.8%;
-      background-color: #ff005d;
+      background-color: #ff005d; /* Red */
       transition: transform 0.5s ease-in-out;
     }
 
     .hand.minute {
       width: 32%;
       height: 0.7%;
-      background-color: #ffea00;
+      background-color: #ffea00; /* Yellow */
       transition: transform 0.5s ease-in-out;
     }
 
     .hand.second {
       width: 38%;
       height: 0.4%;
-      background-color: #00ff6e;
+      background-color: #00ff6e; /* Green */
       transition: transform 0.2s linear;
     }
 
@@ -101,8 +101,8 @@
 
     .digital .hour { color: #ff005d; }
     .digital .minute { color: #ffea00; }
-    .digital .second { color: #45aaff; }
-    .digital .ampm { color: #00ff6e; }
+    .digital .second { color: #00ff6e; }
+    .digital .ampm { color: #45aaff; }
 
     .controls {
       margin-top: 2vh;
@@ -158,7 +158,6 @@
     <button class="mute-toggle" id="toggleSound">🔊 Sound On</button>
   </div>
 
-  <!-- Sounds -->
   <audio id="tickSound" src="https://www.soundjay.com/clock/sounds/clock-ticking-2.mp3" preload="auto"></audio>
   <audio id="minuteSound" src="https://www.soundjay.com/button/beep-06.wav" preload="auto"></audio>
   <audio id="hourSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
@@ -200,8 +199,15 @@
       [tickSound, minuteSound, hourSound].forEach(audio => audio.muted = !soundOn);
     });
 
+    function getISTTime() {
+      const nowUTC = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+      return new Date(nowUTC.getTime() + istOffset);
+    }
+
     function updateClock() {
-      const now = new Date();
+      const now = getISTTime();
+
       let h = now.getHours();
       const m = now.getMinutes();
       const s = now.getSeconds();
@@ -213,18 +219,9 @@
       const minuteDeg = (m + s / 60) * 6;
       const secondDeg = s * 6;
 
-      if (s === 0 && lastSecond === 59) {
-        secondHand.style.transition = "none";
-        secondHand.style.transform = `rotate(${secondDeg}deg)`;
-        setTimeout(() => {
-          secondHand.style.transition = "transform 0.2s linear";
-        }, 50);
-      } else {
-        secondHand.style.transform = `rotate(${secondDeg}deg)`;
-      }
-
       hourHand.style.transform = `rotate(${hourDeg}deg)`;
       minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+      secondHand.style.transform = `rotate(${secondDeg}deg)`;
 
       dhour.textContent = String(h).padStart(2, '0');
       dminute.textContent = String(m).padStart(2, '0');
