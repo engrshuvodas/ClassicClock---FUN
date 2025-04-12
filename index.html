@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfect Clock</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #fff;
+      text-align: center;
+    }
+
+    .clock {
+      position: relative;
+      width: 60vmin;
+      height: 60vmin;
+      min-width: 240px;
+      min-height: 240px;
+      max-width: 90vw;
+      max-height: 90vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, #333, #111);
+      box-shadow: 0 0 30px rgba(0,255,110,0.3);
+    }
+
+    .number {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .number span {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: calc(1rem + 0.3vw);
+      color: #ddd;
+      font-weight: bold;
+    }
+
+    .hand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 50%;
+      border-radius: 4px;
+    }
+
+    .hand.hour {
+      width: 22%;
+      height: 0.8%;
+      background-color: #ff005d;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .hand.minute {
+      width: 32%;
+      height: 0.7%;
+      background-color: #ffea00;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .hand.second {
+      width: 38%;
+      height: 0.4%;
+      background-color: #00ff6e;
+      transition: transform 0.2s linear;
+    }
+
+    .center-dot {
+      position: absolute;
+      width: 3.5%;
+      height: 3.5%;
+      background-color: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      box-shadow: 0 0 10px #00ff6e;
+    }
+
+    .digital {
+      margin-top: 4vh;
+      background: #2a2a2a;
+      padding: 1vh 2vh;
+      border-radius: 12px;
+      display: flex;
+      gap: 1vh;
+      font-size: calc(1.2rem + 0.5vw);
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .digital .hour { color: #ff005d; }
+    .digital .minute { color: #ffea00; }
+    .digital .second { color: #45aaff; }
+    .digital .ampm { color: #00ff6e; }
+
+    .controls {
+      margin-top: 2vh;
+    }
+
+    .mute-toggle {
+      background-color: #333;
+      color: #fff;
+      padding: 1vh 2vh;
+      border: none;
+      border-radius: 8px;
+      font-size: calc(1rem + 0.3vw);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .mute-toggle:hover {
+      background-color: #555;
+    }
+
+    @media (max-width: 400px) {
+      .digital {
+        font-size: 1rem;
+        padding: 8px 12px;
+      }
+
+      .mute-toggle {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="clock">
+    <div class="number" id="numberContainer"></div>
+    <div class="hand hour" id="hourHand"></div>
+    <div class="hand minute" id="minuteHand"></div>
+    <div class="hand second" id="secondHand"></div>
+    <div class="center-dot"></div>
+  </div>
+
+  <div class="digital">
+    <div class="hour" id="dhour">00</div>
+    <div>:</div>
+    <div class="minute" id="dminute">00</div>
+    <div>:</div>
+    <div class="second" id="dsecond">00</div>
+    <div class="ampm" id="ampm">AM</div>
+  </div>
+
+  <div class="controls">
+    <button class="mute-toggle" id="toggleSound">🔊 Sound On</button>
+  </div>
+
+  <!-- Sounds -->
+  <audio id="tickSound" src="https://www.soundjay.com/clock/sounds/clock-ticking-2.mp3" preload="auto"></audio>
+  <audio id="minuteSound" src="https://www.soundjay.com/button/beep-06.wav" preload="auto"></audio>
+  <audio id="hourSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script>
+    const hourHand = document.getElementById('hourHand');
+    const minuteHand = document.getElementById('minuteHand');
+    const secondHand = document.getElementById('secondHand');
+    const dhour = document.getElementById('dhour');
+    const dminute = document.getElementById('dminute');
+    const dsecond = document.getElementById('dsecond');
+    const ampm = document.getElementById('ampm');
+    const toggleBtn = document.getElementById('toggleSound');
+
+    const tickSound = document.getElementById('tickSound');
+    const minuteSound = document.getElementById('minuteSound');
+    const hourSound = document.getElementById('hourSound');
+
+    let lastSecond = -1;
+    let lastMinute = -1;
+    let lastHour = -1;
+    let soundOn = true;
+
+    const numberContainer = document.getElementById('numberContainer');
+    for (let i = 1; i <= 12; i++) {
+      const angle = (i * 30 - 90) * Math.PI / 180;
+      const x = 50 + 44 * Math.cos(angle);
+      const y = 50 + 44 * Math.sin(angle);
+      const span = document.createElement('span');
+      span.textContent = i;
+      span.style.left = `${x}%`;
+      span.style.top = `${y}%`;
+      numberContainer.appendChild(span);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      toggleBtn.textContent = soundOn ? '🔊 Sound On' : '🔇 Sound Off';
+      [tickSound, minuteSound, hourSound].forEach(audio => audio.muted = !soundOn);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      const am = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+
+      const hourDeg = (h + m / 60) * 30;
+      const minuteDeg = (m + s / 60) * 6;
+      const secondDeg = s * 6;
+
+      if (s === 0 && lastSecond === 59) {
+        secondHand.style.transition = "none";
+        secondHand.style.transform = `rotate(${secondDeg}deg)`;
+        setTimeout(() => {
+          secondHand.style.transition = "transform 0.2s linear";
+        }, 50);
+      } else {
+        secondHand.style.transform = `rotate(${secondDeg}deg)`;
+      }
+
+      hourHand.style.transform = `rotate(${hourDeg}deg)`;
+      minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+
+      dhour.textContent = String(h).padStart(2, '0');
+      dminute.textContent = String(m).padStart(2, '0');
+      dsecond.textContent = String(s).padStart(2, '0');
+      ampm.textContent = am;
+
+      if (soundOn) {
+        if (s !== lastSecond) {
+          tickSound.currentTime = 0;
+          tickSound.play();
+        }
+        if (m !== lastMinute) {
+          minuteSound.currentTime = 0;
+          minuteSound.play();
+        }
+        if (h !== lastHour) {
+          hourSound.currentTime = 0;
+          hourSound.play();
+        }
+      }
+
+      lastSecond = s;
+      lastMinute = m;
+      lastHour = h;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
